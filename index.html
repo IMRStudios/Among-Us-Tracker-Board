@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Among Us - Tracker de Sospechosos</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: #ff6b6b;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .color-square {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .color-square:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+
+        .color-square.suspicious {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .color-square.dead {
+            border-color: #ff4444;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+        }
+
+        .color-square.cleared {
+            border-color: #44ff44;
+            box-shadow: 0 0 20px rgba(68, 255, 68, 0.6);
+        }
+
+        .color-square.blocked {
+            opacity: 0.3;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+        }
+
+        .color-square.blocked:hover {
+            transform: none;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-reset {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .legend {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .legend-symbol {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .connections {
+            margin-top: 30px;
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .connection-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .connection-input input {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            flex: 1;
+        }
+
+        .connection-input button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .connections-list {
+            margin-top: 15px;
+        }
+
+        .connection-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .connection-item button {
+            background: #ff4444;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 AMONG US TRACKER</h1>
+        
+        <div class="color-grid" id="colorGrid">
+            <!-- Los colores se generarán con JavaScript -->
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-symbol">👤</span>
+                <span>Normal</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-symbol">❓</span>
+                <span>Sospechoso</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-symbol">💀</span>
+                <span>Muerto</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-symbol">✅</span>
+                <span>Descartado</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-symbol">❌</span>
+                <span>No en partida</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-reset" onclick="resetAll()">🔄 Reset Todo</button>
+        </div>
+
+        <div class="connections">
+            <h3>📝 Conexiones y Notas</h3>
+            <div class="connection-input">
+                <input type="text" id="connectionText" placeholder="Ej: Rojo vio a Azul en medbay, Verde estaba con Amarillo..." />
+                <button onclick="addConnection()">Agregar</button>
+            </div>
+            <div class="connections-list" id="connectionsList">
+                <!-- Las conexiones se mostrarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Colores de Among Us basados en la imagen
+        const colors = [
+            { name: 'Rojo', color: '#C51111', textColor: 'white' },
+            { name: 'Azul', color: '#132ED1', textColor: 'white' },
+            { name: 'Verde', color: '#117F2D', textColor: 'white' },
+            { name: 'Rosa', color: '#ED54BA', textColor: 'white' },
+            { name: 'Naranja', color: '#EF7D0D', textColor: 'white' },
+            { name: 'Amarillo', color: '#F5F557', textColor: 'black' },
+            { name: 'Negro', color: '#3F474E', textColor: 'white' },
+            { name: 'Blanco', color: '#D6E0F0', textColor: 'black' },
+            { name: 'Morado', color: '#6B2FBB', textColor: 'white' },
+            { name: 'Café', color: '#71491E', textColor: 'white' },
+            { name: 'Cyan', color: '#38FEDC', textColor: 'black' },
+            { name: 'Lima', color: '#50EF39', textColor: 'black' },
+            { name: 'Granate', color: '#6B2D5C', textColor: 'white' },
+            { name: 'Rosa Claro', color: '#FFB3DA', textColor: 'black' },
+            { name: 'Banana', color: '#FFFF99', textColor: 'black' },
+            { name: 'Gris', color: '#8394BF', textColor: 'white' },
+            { name: 'Tan', color: '#8C7853', textColor: 'white' },
+            { name: 'Coral', color: '#FF6B7D', textColor: 'white' }
+        ];
+
+        // Estados: normal, suspicious, dead, cleared, blocked
+        const states = ['normal', 'suspicious', 'dead', 'cleared', 'blocked'];
+        const stateSymbols = {
+            'normal': '👤',
+            'suspicious': '❓',
+            'dead': '💀',
+            'cleared': '✅',
+            'blocked': '❌'
+        };
+
+        let colorStates = {};
+        let connections = [];
+
+        // Inicializar el grid
+        function initializeGrid() {
+            const grid = document.getElementById('colorGrid');
+            
+            colors.forEach((colorData, index) => {
+                const square = document.createElement('div');
+                square.className = 'color-square';
+                square.style.backgroundColor = colorData.color;
+                square.style.color = colorData.textColor;
+                square.setAttribute('data-color', colorData.name);
+                square.setAttribute('data-index', index);
+                
+                colorStates[colorData.name] = 'normal';
+                square.textContent = stateSymbols['normal'];
+                
+                square.addEventListener('click', () => toggleState(colorData.name, square));
+                
+                grid.appendChild(square);
+            });
+        }
+
+        // Cambiar estado de un color
+        function toggleState(colorName, element) {
+            const currentStateIndex = states.indexOf(colorStates[colorName]);
+            const nextStateIndex = (currentStateIndex + 1) % states.length;
+            const nextState = states[nextStateIndex];
+            
+            colorStates[colorName] = nextState;
+            element.textContent = stateSymbols[nextState];
+            
+            // Remover todas las clases de estado
+            element.classList.remove('suspicious', 'dead', 'cleared', 'blocked');
+            
+            // Agregar la clase correspondiente
+            if (nextState !== 'normal') {
+                element.classList.add(nextState);
+            }
+        }
+
+        // Reset todo
+        function resetAll() {
+            colors.forEach(colorData => {
+                colorStates[colorData.name] = 'normal';
+                const element = document.querySelector(`[data-color="${colorData.name}"]`);
+                element.textContent = stateSymbols['normal'];
+                element.classList.remove('suspicious', 'dead', 'cleared', 'blocked');
+            });
+            
+            connections = [];
+            updateConnectionsList();
+        }
+
+        // Agregar conexión
+        function addConnection() {
+            const input = document.getElementById('connectionText');
+            const text = input.value.trim();
+            
+            if (text) {
+                connections.push({
+                    id: Date.now(),
+                    text: text,
+                    timestamp: new Date().toLocaleTimeString()
+                });
+                input.value = '';
+                updateConnectionsList();
+            }
+        }
+
+        // Actualizar lista de conexiones
+        function updateConnectionsList() {
+            const list = document.getElementById('connectionsList');
+            list.innerHTML = '';
+            
+            connections.forEach(conn => {
+                const item = document.createElement('div');
+                item.className = 'connection-item';
+                item.innerHTML = `
+                    <span><strong>${conn.timestamp}</strong> - ${conn.text}</span>
+                    <button onclick="removeConnection(${conn.id})">❌</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Remover conexión
+        function removeConnection(id) {
+            connections = connections.filter(conn => conn.id !== id);
+            updateConnectionsList();
+        }
+
+        // Permitir agregar conexión con Enter
+        document.getElementById('connectionText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addConnection();
+            }
+        });
+
+        // Inicializar
+        initializeGrid();
+    </script>
+</body>
+</html>
